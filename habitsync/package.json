@@ -7,6 +7,7 @@
     "firebase": "^11.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-router-dom": "^7.1.5",
     "react-scripts": "5.0.1"
   },
   "scripts": {
@@ -14,7 +15,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "npx tailwindcss -i ./src/styles/input.css -o ./src/styles/output.css --watch", 
+    "dev": "npx tailwindcss -i ./src/styles/input.css -o ./src/styles/output.css --watch",
     "build:css": "npx tailwindcss -i ./src/styles/input.css -o ./src/styles/output.css"
   },
   "eslintConfig": {

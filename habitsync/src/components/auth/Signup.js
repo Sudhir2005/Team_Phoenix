@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './Signup.css';
 
-const Signup = () => {
+const Signup = ({ setIsAuthenticated, navigate }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,11 +19,13 @@ const Signup = () => {
     }
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate 1-second delay
-      localStorage.setItem('token', 'your_generated_token'); // Example token storage
-      navigate('/protected'); // Redirect after successful signup
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate delay
+
+      localStorage.setItem('token', 'your_generated_token');
+      setIsAuthenticated(true); // Update auth state
+      navigate('/protected'); // Programmatic navigation using `useNavigate`
     } catch (err) {
-      setError(err.message || "Signup failed.");
+      setError(err.message || 'Signup failed.');
       console.error("Signup Error:", err);
     } finally {
       setLoading(false);
@@ -36,10 +35,10 @@ const Signup = () => {
   return (
     <div className="signup-container">
       <div className="signup-card">
-        <h2 className="signup-title">Create Account</h2>
+        <h2 className="signup-title">Sign Up</h2>
         {error && <p className="signup-error">{error}</p>}
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className="mb-4">
             <label htmlFor="email" className="signup-label">Email</label>
             <input
               type="email"
@@ -50,7 +49,7 @@ const Signup = () => {
               required
             />
           </div>
-          <div className="form-group">
+          <div className="mb-6">
             <label htmlFor="password" className="signup-label">Password</label>
             <input
               type="password"
@@ -61,11 +60,11 @@ const Signup = () => {
               required
             />
           </div>
-          <div className="form-group">
-            <label htmlFor="confirm-password" className="signup-label">Confirm Password</label>
+          <div className="mb-6">
+            <label htmlFor="confirmPassword" className="signup-label">Confirm Password</label>
             <input
               type="password"
-              id="confirm-password"
+              id="confirmPassword"
               className="signup-input"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -74,14 +73,11 @@ const Signup = () => {
           </div>
           <button
             type="submit"
-            className={`signup-button ${loading ? 'signup-button-disabled' : ''}`}
+            className="signup-button"
             disabled={loading}
           >
             {loading ? 'Signing up...' : 'Sign Up'}
           </button>
-          <div className="signup-login-link">
-            <a href="/login">Already have an account? Log In</a>
-          </div>
         </form>
       </div>
     </div>
