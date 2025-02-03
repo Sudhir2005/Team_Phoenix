@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Login = ({ setIsAuthenticated, navigate }) => {
   const [email, setEmail] = useState('');
@@ -11,57 +13,69 @@ const Login = ({ setIsAuthenticated, navigate }) => {
     setError(null);
     setLoading(true);
 
-    // Simulate login API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate delay
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
 
+      // Simulating successful login
       localStorage.setItem('token', 'your_generated_token');
-      setIsAuthenticated(true); // Update auth state
-      navigate('/protected'); // Programmatic navigation using `useNavigate`
+      setIsAuthenticated(true);
+      navigate('/protected'); // Redirect to protected page
     } catch (err) {
-      setError(err.message || 'Login failed.');
-      console.error("Login Error:", err);
+      setError('Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h2 className="login-title">Login</h2>
-        {error && <p className="login-error">{error}</p>}
+    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div className="card shadow-lg p-4" style={{ width: '400px' }}>
+        <h2 className="text-center text-primary">Login</h2>
+        <p className="text-center text-muted">Access your account securely</p>
+
+        {error && <div className="alert alert-danger py-2">{error}</div>}
+
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="email" className="login-label">Email</label>
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">Email Address</label>
             <input
               type="email"
               id="email"
-              className="login-input"
+              className="form-control"
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
-          <div className="mb-6">
-            <label htmlFor="password" className="login-label">Password</label>
+
+          <div className="mb-3">
+            <label htmlFor="password" className="form-label">Password</label>
             <input
               type="password"
               id="password"
-              className="login-input"
+              className="form-control"
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <Link to="/forgot-password" className="d-block text-end text-primary mt-1 small">Forgot Password?</Link>
           </div>
+
+          {/* Bootstrap-styled Button */}
           <button
             type="submit"
-            className="login-button"
+            className="btn btn-primary w-100"
             disabled={loading}
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
+
+        <p className="text-center mt-3">
+          Don't have an account? <Link to="/signup" className="text-primary fw-bold">Sign up here</Link>
+        </p>
       </div>
     </div>
   );

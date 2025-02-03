@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'; // Correct imports
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // Remove useNavigate
 import Signup from './components/auth/Signup';
 import Login from './components/auth/Login';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const navigate = useNavigate(); // useNavigate hook
 
   const checkAuth = () => {
     const token = localStorage.getItem('token');
@@ -21,11 +22,11 @@ const App = () => {
       <Routes>
         <Route
           path="/signup"
-          element={<Signup setIsAuthenticated={setIsAuthenticated} navigate={navigate} />}
+          element={<Signup setIsAuthenticated={setIsAuthenticated} />}
         />
         <Route
           path="/login"
-          element={<Login setIsAuthenticated={setIsAuthenticated} navigate={navigate} />}
+          element={<Login setIsAuthenticated={setIsAuthenticated} />}
         />
         <Route
           path="/"
