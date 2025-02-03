@@ -6,58 +6,35 @@ import Dashboard from './components/pages/Dashboard';
 import HabitPage from './components/pages/HabitPage';
 import LeaderboardPage from './components/pages/LeaderboardPage';
 import Profile from './components/pages/Profile';
+import DashboardUI from './components/dashboard/DashboardUI';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const checkAuth = () => {
-    const token = localStorage.getItem('token');
-    return !!token;
-  };
-
   useEffect(() => {
-    setIsAuthenticated(checkAuth());
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
   }, []);
 
   return (
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
-        <Route
-          path="/signup"
-          element={<Signup setIsAuthenticated={setIsAuthenticated} />}
-        />
-        <Route
-          path="/login"
-          element={<Login setIsAuthenticated={setIsAuthenticated} />}
-        />
+        <Route path="/signup" element={<Signup setIsAuthenticated={setIsAuthenticated} />} />
+        <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
         
         {/* Protected Routes */}
-        <Route
-          path="/dashboard"
-          element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/habit"
-          element={isAuthenticated ? <HabitPage /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/leaderboard"
-          element={isAuthenticated ? <LeaderboardPage /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/profile"
-          element={isAuthenticated ? <Profile /> : <Navigate to="/login" />}
-        />
+        <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
+        <Route path="/habit" element={isAuthenticated ? <HabitPage /> : <Navigate to="/login" />} />
+        <Route path="/leaderboard" element={isAuthenticated ? <LeaderboardPage /> : <Navigate to="/login" />} />
+        <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
+        <Route path="/dashboard-ui" element={isAuthenticated ? <DashboardUI /> : <Navigate to="/login" />} />
         
         {/* Home Route */}
-        <Route
-          path="/"
-          element={isAuthenticated ? <div>Protected Content (You are logged in!)</div> : <Navigate to="/login" />}
-        />
+        <Route path="/" element={isAuthenticated ? <DashboardUI /> : <Navigate to="/login" />} />
         
-        {/* Fallback route if the user visits an unknown route */}
+        {/* Fallback route */}
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
