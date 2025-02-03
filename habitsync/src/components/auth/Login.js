@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Login = ({ setIsAuthenticated, navigate }) => {
+const Login = ({ setIsAuthenticated }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // Initialize the navigate hook
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,10 +17,10 @@ const Login = ({ setIsAuthenticated, navigate }) => {
     try {
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
 
-      // Simulating successful login
+      // Simulate successful login
       localStorage.setItem('token', 'your_generated_token');
       setIsAuthenticated(true);
-      navigate('/protected'); // Redirect to protected page
+      navigate('/dashboard'); // Redirect to Dashboard after successful login
     } catch (err) {
       setError('Invalid email or password. Please try again.');
     } finally {
@@ -63,7 +64,6 @@ const Login = ({ setIsAuthenticated, navigate }) => {
             <Link to="/forgot-password" className="d-block text-end text-primary mt-1 small">Forgot Password?</Link>
           </div>
 
-          {/* Bootstrap-styled Button */}
           <button
             type="submit"
             className="btn btn-primary w-100"
