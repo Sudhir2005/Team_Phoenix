@@ -1,66 +1,88 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
-import { TextField, Button, IconButton, Typography, Paper } from "@mui/material";
-import { FaUser, FaLock } from "react-icons/fa";
-import AuthContainer from "./AuthContainer"; // Assuming this is a shared wrapper component
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const navigate = useNavigate(); // Initialize navigate
+const Login = ({ setIsAuthenticated }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // useNavigate for navigation
 
-  const handleLogin = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError(null);
+    setLoading(true);
 
-    // Check if email and password are provided
-    if (email && password) {
-      // Store user details in localStorage
-      localStorage.setItem("user", JSON.stringify({ email, password }));
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
 
-      // Navigate to the dashboard after successful login
-      navigate("/dashboard"); // Redirect to dashboard
-    } else {
-      setError("Please enter both email and password!"); // Display error if fields are empty
+      // Check if password is correct (any email is accepted)
+      if (password === "123456789") {
+        localStorage.setItem('token', 'your_generated_token');
+        setIsAuthenticated(true);
+        navigate('/dashboard'); // Redirect to dashboard
+      } else {
+        throw new Error('Invalid password. Please try again.');
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <AuthContainer title="Login" isLogin={true}>
-      <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
-        {error && <Typography variant="body2" color="error" align="center" gutterBottom>{error}</Typography>}
-        <form onSubmit={handleLogin}>
-          <TextField
-            label="Email"
-            type="email"
-            fullWidth
-            margin="normal"
-            required
-            InputProps={{
-              startAdornment: <IconButton position="start"><FaUser /></IconButton>
-            }}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            label="Password"
-            type="password"
-            fullWidth
-            margin="normal"
-            required
-            InputProps={{
-              startAdornment: <IconButton position="start"><FaLock /></IconButton>
-            }}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-            Login
-          </Button>
+    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div className="card shadow-lg p-4" style={{ width: '400px' }}>
+        <h2 className="text-center text-primary">Login</h2>
+        <p className="text-center text-muted">Access your account securely</p>
+
+        {error && <div className="alert alert-danger py-2">{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              className="form-control"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="password" className="form-label">Password</label>
+            <input
+              type="password"
+              id="password"
+              className="form-control"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <Link to="/forgot-password" className="d-block text-end text-primary mt-1 small">Forgot Password?</Link>
+          </div>
+
+          {/* Bootstrap-styled Button */}
+          <button
+            type="submit"
+            className="btn btn-primary w-100"
+            disabled={loading}
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
         </form>
-      </Paper>
-    </AuthContainer>
+
+        <p className="text-center mt-3">
+          Don't have an account? <Link to="/signup" className="text-primary fw-bold">Sign up here</Link>
+        </p>
+      </div>
+    </div>
   );
 };
 

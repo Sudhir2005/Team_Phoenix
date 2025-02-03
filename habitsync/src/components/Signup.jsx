@@ -1,78 +1,102 @@
-import React, { useState } from "react";
-import { TextField, Button, IconButton, Typography, Box, Paper } from "@mui/material";
-import { FaUser, FaLock, FaEnvelope } from "react-icons/fa";
-import AuthContainer from "./AuthContainer"; // Assuming this is a shared wrapper component
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Signup = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+const Signup = ({ setIsAuthenticated, navigate }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSignup = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError(null);
+    setLoading(true);
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match!");
+      setError("Passwords do not match.");
+      setLoading(false);
       return;
     }
 
-    // Store user details in localStorage
-    localStorage.setItem("user", JSON.stringify({ email, password }));
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
-    alert("Account created! You can now login.");
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+
+      // Simulating successful signup
+      localStorage.setItem('token', 'your_generated_token');
+      setIsAuthenticated(true);
+      navigate('/protected'); // Redirect to protected page
+    } catch (err) {
+      setError('Signup failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <AuthContainer title="Sign Up" isLogin={false}>
-      <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
-        {error && <Typography variant="body2" color="error" align="center" gutterBottom>{error}</Typography>}
-        <form onSubmit={handleSignup}>
-          <TextField
-            label="Email"
-            type="email"
-            fullWidth
-            margin="normal"
-            required
-            InputProps={{
-              startAdornment: <IconButton position="start"><FaEnvelope /></IconButton>
-            }}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            label="Password"
-            type="password"
-            fullWidth
-            margin="normal"
-            required
-            InputProps={{
-              startAdornment: <IconButton position="start"><FaLock /></IconButton>
-            }}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <TextField
-            label="Confirm Password"
-            type="password"
-            fullWidth
-            margin="normal"
-            required
-            InputProps={{
-              startAdornment: <IconButton position="start"><FaLock /></IconButton>
-            }}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-            Sign Up
-          </Button>
+    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div className="card shadow-lg p-4" style={{ width: '400px' }}>
+        <h2 className="text-center text-success">Sign Up</h2>
+        <p className="text-center text-muted">Create your account</p>
+
+        {error && <div className="alert alert-danger py-2">{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              className="form-control"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="password" className="form-label">Password</label>
+            <input
+              type="password"
+              id="password"
+              className="form-control"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              className="form-control"
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Bootstrap-styled Button */}
+          <button
+            type="submit"
+            className="btn btn-success w-100"
+            disabled={loading}
+          >
+            {loading ? 'Signing up...' : 'Sign Up'}
+          </button>
         </form>
-      </Paper>
-    </AuthContainer>
+
+        <p className="text-center mt-3">
+          Already have an account? <Link to="/login" className="text-success fw-bold">Login here</Link>
+        </p>
+      </div>
+    </div>
   );
 };
 
