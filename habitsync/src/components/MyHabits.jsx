@@ -9,41 +9,40 @@ const MyHabits = ({ habits, setHabits }) => {
   };
 
   return (
-    <Container sx={{ textAlign: "center", mt: 5 }}>
-      <Typography variant="h4" fontWeight="bold" sx={{ mb: 3, color: "#333" }}>
-        My Habits
-      </Typography>
-
-      {habits.length === 0 ? (
-        <Typography variant="body1" sx={{ mt: 2, color: "#777" }}>
-          No habits yet! Create one above. 😊
+    <Container maxWidth="md" sx={{ textAlign: "center", mt: 5 }}>
+      <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+        <Typography variant="h4" fontWeight="bold" color="#2E8B57">
+          My Habits
         </Typography>
-      ) : (
-        <Grid container spacing={3}>
-          {habits.map((habit) => (
-            <Grid item xs={12} sm={6} md={4} key={habit.id}>
+      </motion.div>
+
+      <Grid container spacing={4} sx={{ mt: 3 }}>
+        {habits.length === 0 ? (
+          <Typography variant="body1" sx={{ mt: 2 }}>
+            No habits yet! Create one above. 😊
+          </Typography>
+        ) : (
+          habits.map((habit) => (
+            <Grid item xs={12} sm={6} key={habit.id}>
               <motion.div whileHover={{ scale: 1.05 }}>
                 <Card
                   sx={{
-                    background: `linear-gradient(135deg, ${habit.color}, #ffffff40)`,
+                    background: habit.color,
                     borderRadius: 4,
                     color: "#fff",
                     textAlign: "center",
-                    boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.2)",
+                    p: 2,
+                    boxShadow: 3,
                   }}
                 >
                   <CardContent>
-                    <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                    <Typography variant="h5">
                       {habit.icon} {habit.name}
                     </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                      Category: {habit.category}
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                      Start Date: {habit.startDate}
-                    </Typography>
+                    <Typography variant="body2">Category: {habit.category}</Typography>
+                    <Typography variant="body2">Start Date: {habit.startDate}</Typography>
                     <Box mt={2}>
-                      <IconButton onClick={() => handleDeleteHabit(habit.id)} sx={{ color: "#fff" }}>
+                      <IconButton onClick={() => handleDeleteHabit(habit.id)} color="inherit">
                         <FaTrash />
                       </IconButton>
                     </Box>
@@ -51,9 +50,9 @@ const MyHabits = ({ habits, setHabits }) => {
                 </Card>
               </motion.div>
             </Grid>
-          ))}
-        </Grid>
-      )}
+          ))
+        )}
+      </Grid>
     </Container>
   );
 };

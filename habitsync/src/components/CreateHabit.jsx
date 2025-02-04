@@ -11,7 +11,8 @@ import {
   Snackbar,
   IconButton,
   Box,
-  Paper,
+  Card,
+  CardContent,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { FaCheckCircle, FaSmile, FaPalette } from "react-icons/fa";
@@ -40,9 +41,10 @@ const CreateHabit = ({ setHabits }) => {
         color: habitColor,
       };
 
-      setHabits((prevHabits) => [...prevHabits, newHabit]); 
+      setHabits((prevHabits) => [...prevHabits, newHabit]);
       setSuccessOpen(true);
 
+      // Reset form
       setHabitName("");
       setCategory("");
       setStartDate(dayjs());
@@ -53,63 +55,53 @@ const CreateHabit = ({ setHabits }) => {
 
   return (
     <Container maxWidth="sm" sx={{ textAlign: "center", mt: 5 }}>
-      <Paper elevation={6} sx={{ p: 4, borderRadius: 4, background: "linear-gradient(135deg, #667eea, #764ba2)", color: "#fff" }}>
-        <Typography variant="h4" fontWeight="bold" sx={{ mb: 2 }}>
-          Create a New Habit
-        </Typography>
+      <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+        <Card sx={{ p: 3, borderRadius: 4, boxShadow: 3, background: "#f3f4f6" }}>
+          <CardContent>
+            <Typography variant="h4" fontWeight="bold" color="#2E8B57">
+              Create a New Habit
+            </Typography>
 
-        <TextField
-          fullWidth
-          label="Habit Name"
-          variant="outlined"
-          sx={{ mt: 3, background: "#fff", borderRadius: 2 }}
-          value={habitName}
-          onChange={(e) => setHabitName(e.target.value)}
-        />
+            <TextField fullWidth label="Habit Name" variant="outlined" sx={{ mt: 3 }} value={habitName} onChange={(e) => setHabitName(e.target.value)} />
 
-        <FormControl fullWidth sx={{ mt: 3, background: "#fff", borderRadius: 2 }}>
-          <InputLabel>Category</InputLabel>
-          <Select value={category} onChange={(e) => setCategory(e.target.value)}>
-            {categories.map((cat, index) => (
-              <MenuItem key={index} value={cat}>
-                {cat}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+            <FormControl fullWidth sx={{ mt: 3 }}>
+              <InputLabel>Category</InputLabel>
+              <Select value={category} onChange={(e) => setCategory(e.target.value)}>
+                {categories.map((cat, index) => (
+                  <MenuItem key={index} value={cat}>
+                    {cat}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-        <Box display="flex" justifyContent="center" alignItems="center" mt={3}>
-          <IconButton color="primary" onClick={() => setEmojiPickerOpen(!emojiPickerOpen)}>
-            <FaSmile size={24} />
-          </IconButton>
-          {emojiPickerOpen && <Picker onEmojiClick={(e, emojiObject) => setHabitIcon(emojiObject.emoji)} />}
-        </Box>
+            <Box mt={3} display="flex" justifyContent="center">
+              <IconButton color="primary" onClick={() => setEmojiPickerOpen(!emojiPickerOpen)}>
+                <FaSmile size={24} />
+              </IconButton>
+              {emojiPickerOpen && <Picker onEmojiClick={(e, emojiObject) => setHabitIcon(emojiObject.emoji)} />}
+            </Box>
 
-        <Box display="flex" justifyContent="center" alignItems="center" mt={3}>
-          <FaPalette size={24} />
-          <input
-            type="color"
-            value={habitColor}
-            onChange={(e) => setHabitColor(e.target.value)}
-            style={{
-              marginLeft: 10,
-              cursor: "pointer",
-              border: "none",
-              width: 40,
-              height: 40,
-              borderRadius: "50%",
-            }}
-          />
-        </Box>
+            <Box mt={3} display="flex" alignItems="center" justifyContent="center">
+              <FaPalette size={24} />
+              <input
+                type="color"
+                value={habitColor}
+                onChange={(e) => setHabitColor(e.target.value)}
+                style={{ marginLeft: 10, cursor: "pointer", border: "none", width: 40, height: 40 }}
+              />
+            </Box>
 
-        <motion.div whileHover={{ scale: 1.1 }} style={{ marginTop: "30px" }}>
-          <Button variant="contained" color="secondary" startIcon={<FaCheckCircle />} onClick={handleCreateHabit} sx={{ backgroundColor: "#ff4081" }}>
-            Create Habit
-          </Button>
-        </motion.div>
+            <motion.div whileHover={{ scale: 1.1 }} style={{ marginTop: "30px" }}>
+              <Button variant="contained" color="primary" startIcon={<FaCheckCircle />} onClick={handleCreateHabit}>
+                Create Habit
+              </Button>
+            </motion.div>
 
-        <Snackbar open={successOpen} autoHideDuration={3000} onClose={() => setSuccessOpen(false)} message="🎉 Habit Created Successfully!" />
-      </Paper>
+            <Snackbar open={successOpen} autoHideDuration={3000} onClose={() => setSuccessOpen(false)} message="🎉 Habit Created Successfully!" />
+          </CardContent>
+        </Card>
+      </motion.div>
     </Container>
   );
 };
