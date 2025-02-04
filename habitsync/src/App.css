@@ -42,3 +42,38 @@
 }
 
 @import "tailwindcss";
+
+.bg-gradient {
+  background: linear-gradient(135deg, #56ccf2, #2E8B57);
+}
+
+.auth-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.input-group-text {
+  border-right: 0;
+}
+
+.form-control {
+  border-left: 0;
+}
+
+.form-control:focus {
+  box-shadow: none;
+  border-color: #2E8B57;
+}
