@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Grid, Card, CardContent, Typography, IconButton, Container, Box } from "@mui/material";
 import { FaTrash } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { db, auth } from "../firebase"; // Import Firestore & Auth
+import { db, auth } from "../firebase";
 import { collection, doc, getDocs, deleteDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom"; // Navigation
 
 const MyHabits = ({ habits, setHabits }) => {
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchHabits = async () => {
       const user = auth.currentUser;
@@ -25,8 +28,8 @@ const MyHabits = ({ habits, setHabits }) => {
     if (!user) return;
 
     try {
-      await deleteDoc(doc(db, `users/${user.uid}/habits`, id)); // Delete from Firestore
-      setHabits((prev) => prev.filter((habit) => habit.id !== id)); // Remove from state
+      await deleteDoc(doc(db, `users/${user.uid}/habits`, id));
+      setHabits((prev) => prev.filter((habit) => habit.id !== id));
     } catch (error) {
       console.error("Error deleting habit:", error);
     }
@@ -49,13 +52,29 @@ const MyHabits = ({ habits, setHabits }) => {
           habits.map((habit) => (
             <Grid item xs={12} sm={6} key={habit.id}>
               <motion.div whileHover={{ scale: 1.05 }}>
-                <Card sx={{ background: habit.color, borderRadius: 4, color: "#fff", textAlign: "center", p: 2, boxShadow: 3 }}>
+                <Card
+                  sx={{
+                    background: `linear-gradient(135deg, ${habit.color}, #1E3A8A)`,
+                    borderRadius: "20px",
+                    color: "#fff",
+                    textAlign: "center",
+                    p: 3,
+                    boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.1)",
+                    cursor: "pointer",
+                    transition: "all 0.3s",
+                    "&:hover": { transform: "scale(1.05)" },
+                  }}
+                  onClick={() => navigate(`/habit/${habit.id}`, { state: habit })}
+                >
                   <CardContent>
-                    <Typography variant="h5">{habit.icon} {habit.name}</Typography>
-                    <Typography variant="body2">Category: {habit.category}</Typography>
-                    <Typography variant="body2">Start Date: {habit.startDate}</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                      {habit.icon} {habit.name}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontStyle: "italic", opacity: 0.8 }}>
+                      {habit.category} | {habit.startDate}
+                    </Typography>
                     <Box mt={2}>
-                      <IconButton onClick={() => handleDeleteHabit(habit.id)} color="inherit">
+                      <IconButton onClick={(e) => { e.stopPropagation(); handleDeleteHabit(habit.id); }} color="inherit">
                         <FaTrash />
                       </IconButton>
                     </Box>
