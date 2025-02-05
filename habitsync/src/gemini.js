@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI("YOUR_GEMINI_API_KEY");
+const genAI = new GoogleGenerativeAI("AIzaSyB5-LbaNgBmE-KKqcdiTnmrdfdSTcDSk9c");
 
 export const generateTaskPlan = async (habitName) => {
   try {

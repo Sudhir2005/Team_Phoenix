@@ -1,221 +1,137 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Snackbar,
-  IconButton,
   Box,
+  Typography,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  LinearProgress,
   Card,
   CardContent,
 } from "@mui/material";
+import { Add, Delete, Edit, TrendingUp } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaCheckCircle, FaSmile, FaPalette } from "react-icons/fa";
-import Picker from "emoji-picker-react";
-import dayjs from "dayjs";
-import { auth, db } from "../firebase"; // Import Firebase
-import { doc, setDoc } from "firebase/firestore";
+import { generateTaskPlan } from "../gemini";
+import { auth, db } from "../firebase";
+import { doc, setDoc, getDocs, collection, deleteDoc } from "firebase/firestore";
 
-const CreateHabit = ({ setHabits }) => {
-  const [habitName, setHabitName] = useState("");
-  const [category, setCategory] = useState("");
-  const [startDate, setStartDate] = useState(dayjs());
-  const [habitIcon, setHabitIcon] = useState("🔥");
-  const [habitColor, setHabitColor] = useState("#ff9a9e");
-  const [successOpen, setSuccessOpen] = useState(false);
-  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+const MyHabits = () => {
+  const [habits, setHabits] = useState([]);
+  const [newHabit, setNewHabit] = useState("");
+  const [loadingAI, setLoadingAI] = useState(false);
+  const navigate = useNavigate();
 
-  const categories = ["Fitness", "Health", "Productivity", "Mindfulness", "Finance", "Hobbies"];
-
-  const handleCreateHabit = async () => {
-    if (!habitName || !category) {
-      alert("Please enter a habit name and select a category.");
-      return;
-    }
-
-    // Ensure the user is authenticated
-    const user = auth.currentUser;
-    if (!user) {
-      alert("You must be logged in to create a habit.");
-      return;
-    }
-
-    const habitId = Date.now().toString(); // Unique habit ID
-    const newHabit = {
-      id: habitId,
-      name: habitName,
-      category,
-      startDate: startDate.format("YYYY-MM-DD"),
-      icon: habitIcon,
-      color: habitColor,
+  useEffect(() => {
+    const fetchHabits = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      const habitsCollection = collection(db, `users/${user.uid}/habits`);
+      const habitDocs = await getDocs(habitsCollection);
+      const loadedHabits = habitDocs.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setHabits(loadedHabits);
     };
 
+    fetchHabits();
+  }, []);
+
+  const handleCreateHabit = async () => {
+    if (!newHabit.trim()) return;
+    const user = auth.currentUser;
+    if (!user) return alert("You must be logged in.");
+
+    setLoadingAI(true);
+
     try {
-      // Store habit in Firestore under the user's ID
-      await setDoc(doc(db, `users/${user.uid}/habits`, habitId), newHabit);
+      const aiTasks = await generateTaskPlan(newHabit);
+      const newHabitData = {
+        id: Date.now().toString(),
+        name: newHabit,
+        tasks: aiTasks.map((task) => ({ description: task, completed: false })),
+        progress: 0,
+      };
 
-      // Update local state
-      setHabits((prev) => [...prev, newHabit]);
-      setSuccessOpen(true);
-
-      // Reset form
-      setHabitName("");
-      setCategory("");
-      setStartDate(dayjs());
-      setHabitIcon("🔥");
-      setHabitColor("#ff9a9e");
+      await setDoc(doc(db, `users/${user.uid}/habits`, newHabitData.id), newHabitData);
+      setHabits([...habits, newHabitData]);
+      setNewHabit("");
     } catch (error) {
-      console.error("Error creating habit:", error);
-      alert("Error: " + error.message);
+      console.error("AI Error:", error);
+    } finally {
+      setLoadingAI(false);
     }
   };
 
+  const handleDeleteHabit = async (id) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    await deleteDoc(doc(db, `users/${user.uid}/habits`, id));
+    setHabits(habits.filter((habit) => habit.id !== id));
+  };
+
   return (
-    <Container maxWidth="sm" sx={{ textAlign: "center", mt: 5 }}>
-      {/* Gradient background animation */}
-      <motion.div 
-        initial={{ opacity: 0, y: 50 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 1 }}
-        style={{
-          background: "linear-gradient(to right, #ff7e5f, #feb47b)", 
-          padding: "5px", 
-          borderRadius: "10px",
-          boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.1)"
-        }}
-      >
-        <Card sx={{ p: 3, borderRadius: 4, boxShadow: 6, background: "linear-gradient(to right, #FDC830, #F37335)" }}>
-          <CardContent>
-            {/* Gradient Typography */}
-            <Typography 
-              variant="h4" 
-              fontWeight="bold" 
-              sx={{
-                backgroundImage: "linear-gradient(to left, #ff7e5f, #feb47b)", 
-                WebkitBackgroundClip: "text", 
-                color: "transparent",
-                fontSize: "2rem"
-              }}
-            >
-              Create a New Habit
-            </Typography>
+    <Box sx={{ padding: "20px", textAlign: "center" }}>
+      <Typography variant="h4" sx={{ fontWeight: "bold", mb: 2 }}>
+        My Habits
+      </Typography>
 
-            {/* Habit Name Field with smooth entry animation */}
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              <TextField
-                fullWidth
-                label="Habit Name"
-                variant="outlined"
-                sx={{ mt: 3, backgroundColor: "#fff" }}
-                value={habitName}
-                onChange={(e) => setHabitName(e.target.value)}
-                InputLabelProps={{
-                  style: { color: "#ff7e5f" },
-                }}
-              />
-            </motion.div>
+      {/* Habit Input & Add Button */}
+      <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+        <input
+          type="text"
+          placeholder="Enter new habit..."
+          value={newHabit}
+          onChange={(e) => setNewHabit(e.target.value)}
+          style={{
+            padding: "10px",
+            width: "60%",
+            borderRadius: "5px",
+            border: "1px solid #ccc",
+            marginRight: "10px",
+          }}
+        />
+        <Button variant="contained" color="primary" onClick={handleCreateHabit} startIcon={<Add />} disabled={loadingAI}>
+          {loadingAI ? "Generating..." : "Add"}
+        </Button>
+      </Box>
 
-            {/* Category Dropdown with animation */}
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              transition={{ delay: 0.3, duration: 0.5 }}
-            >
-              <FormControl fullWidth sx={{ mt: 3 }}>
-                <InputLabel sx={{ color: "#ff7e5f" }}>Category</InputLabel>
-                <Select value={category} onChange={(e) => setCategory(e.target.value)}>
-                  {categories.map((cat, index) => (
-                    <MenuItem key={index} value={cat}>
-                      {cat}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </motion.div>
+      {/* Habit List */}
+      {habits.length > 0 ? (
+        <List sx={{ width: "100%", maxWidth: 500, margin: "auto", bgcolor: "background.paper", borderRadius: "10px" }}>
+          {habits.map((habit) => (
+            <Card key={habit.id} sx={{ mb: 2, boxShadow: 3, borderRadius: 3 }}>
+              <CardContent>
+                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                  {habit.name}
+                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+                  <LinearProgress variant="determinate" value={habit.progress} sx={{ flex: 1, mr: 1 }} />
+                  <Typography variant="body2">{Math.round(habit.progress)}%</Typography>
+                </Box>
 
-            {/* Emoji Picker Icon with Hover Animation */}
-            <Box mt={3} display="flex" justifyContent="center">
-              <motion.div 
-                whileHover={{ scale: 1.2 }} 
-                whileTap={{ scale: 0.9 }}
-                style={{ color: "#ff7e5f" }}
-              >
-                <IconButton onClick={() => setEmojiPickerOpen(!emojiPickerOpen)}>
-                  <FaSmile size={24} />
-                </IconButton>
-              </motion.div>
-
-              {emojiPickerOpen && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  transition={{ duration: 0.3 }}
-                >
-                  <Picker onEmojiClick={(e, emojiObject) => setHabitIcon(emojiObject.emoji)} />
-                </motion.div>
-              )}
-            </Box>
-
-            {/* Color Picker with Hover Effect */}
-            <Box mt={3} display="flex" alignItems="center" justifyContent="center">
-              <motion.div whileHover={{ scale: 1.1 }} style={{ color: "#ff7e5f" }}>
-                <FaPalette size={24} />
-              </motion.div>
-              <input
-                type="color"
-                value={habitColor}
-                onChange={(e) => setHabitColor(e.target.value)}
-                style={{
-                  marginLeft: 10,
-                  cursor: "pointer",
-                  border: "none",
-                  width: 40,
-                  height: 40,
-                  boxShadow: "0px 0px 5px rgba(0, 0, 0, 0.2)",
-                  borderRadius: "50%",
-                }}
-              />
-            </Box>
-
-            {/* Create Habit Button with Hover Scaling Animation */}
-            <motion.div whileHover={{ scale: 1.1 }} style={{ marginTop: "30px" }}>
-              <Button 
-                variant="contained" 
-                color="primary" 
-                startIcon={<FaCheckCircle />} 
-                onClick={handleCreateHabit}
-                sx={{
-                  backgroundColor: "#ff7e5f",
-                  ":hover": { backgroundColor: "#feb47b" },
-                }}
-              >
-                Create Habit
-              </Button>
-            </motion.div>
-
-            {/* Success Snackbar with Slide-Up Animation */}
-            <Snackbar
-              open={successOpen}
-              autoHideDuration={3000}
-              onClose={() => setSuccessOpen(false)}
-              message="🎉 Habit Created Successfully!"
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-              TransitionProps={{ in: successOpen, timeout: 300 }}
-            />
-          </CardContent>
-        </Card>
-      </motion.div>
-    </Container>
+                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+                  <Button variant="contained" color="success" startIcon={<TrendingUp />} onClick={() => navigate(`/habit/${habit.id}`)}>
+                    Track
+                  </Button>
+                  <IconButton edge="end" color="error" onClick={() => handleDeleteHabit(habit.id)}>
+                    <Delete />
+                  </IconButton>
+                </Box>
+              </CardContent>
+            </Card>
+          ))}
+        </List>
+      ) : (
+        <Typography variant="body1" color="textSecondary">
+          No habits added yet. Start by adding a new habit!
+        </Typography>
+      )}
+    </Box>
   );
 };
 
-export default CreateHabit;
+export default MyHabits;
