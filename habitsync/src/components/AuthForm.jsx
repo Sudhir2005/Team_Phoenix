@@ -1,7 +1,17 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaEnvelope, FaLock, FaUser, FaGoogle } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaGoogle } from "react-icons/fa";
+import { 
+  auth, 
+  db, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signInWithPopup, 
+  googleProvider, 
+  doc, 
+  setDoc 
+} from "../firebase"; // Firebase imports
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const AuthForm = ({ isSignup, setIsAuthenticated }) => {
@@ -12,31 +22,91 @@ const AuthForm = ({ isSignup, setIsAuthenticated }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Handle Signup/Login
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
-
+  
     if (isSignup && password !== confirmPassword) {
       setError("Passwords do not match.");
       setLoading(false);
       return;
     }
-
+  
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      localStorage.setItem("token", "your_generated_token");
+      let userCredential;
+  
+      if (isSignup) {
+        // 🔹 Sign up the user
+        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+  
+        // 🔹 Store user details in Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          email: user.email,
+          createdAt: new Date().toISOString(),
+        });
+  
+        console.log("✅ User registered:", user);
+      } else {
+        // 🔹 Log in the user
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log("✅ User logged in:", userCredential.user);
+      }
+  
+      // 🔹 Get authentication token
+      const idToken = await userCredential.user.getIdToken();
+      localStorage.setItem("token", idToken);
       setIsAuthenticated(true);
-      navigate("/dashboard");
+  
+      console.log("🔄 Redirecting to dashboard...");
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(isSignup ? "Signup failed. Try again." : "Invalid login.");
+      console.error("🔥 Error:", err);
+  
+      if (err.code === "auth/email-already-in-use") {
+        setError("This email is already registered. Please log in instead.");
+      } else if (err.code === "auth/weak-password") {
+        setError("Password should be at least 6 characters long.");
+      } else if (err.code === "auth/invalid-email") {
+        setError("Invalid email format. Please check your email.");
+      } else {
+        setError(isSignup ? "Signup failed. Try again." : "Invalid login.");
+      }
     } finally {
       setLoading(false);
     }
   };
+  
+  // Google Sign-In
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
 
-  const handleGoogleSignIn = () => {
-    alert("Google Sign-In Coming Soon! 🚀");
+      // 🔹 Check if user exists in Firestore, if not, add them
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName,
+        profilePic: user.photoURL,
+        createdAt: new Date().toISOString(),
+      }, { merge: true });
+
+      console.log("✅ Google Sign-In Success:", user);
+
+      // 🔹 Get authentication token
+      const idToken = await user.getIdToken();
+      localStorage.setItem("token", idToken);
+
+      setIsAuthenticated(true);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("🔥 Google Sign-In Error:", error);
+      setError("Google Sign-In failed. Try again.");
+    }
   };
 
   return (

@@ -18,6 +18,8 @@ import { motion } from "framer-motion";
 import { FaCheckCircle, FaSmile, FaPalette } from "react-icons/fa";
 import Picker from "emoji-picker-react";
 import dayjs from "dayjs";
+import { auth, db } from "../firebase"; // Import Firebase
+import { doc, setDoc } from "firebase/firestore";
 
 const CreateHabit = ({ setHabits }) => {
   const [habitName, setHabitName] = useState("");
@@ -30,18 +32,35 @@ const CreateHabit = ({ setHabits }) => {
 
   const categories = ["Fitness", "Health", "Productivity", "Mindfulness", "Finance", "Hobbies"];
 
-  const handleCreateHabit = () => {
-    if (habitName && category) {
-      const newHabit = {
-        id: Date.now(),
-        name: habitName,
-        category,
-        startDate: startDate.format("YYYY-MM-DD"),
-        icon: habitIcon,
-        color: habitColor,
-      };
+  const handleCreateHabit = async () => {
+    if (!habitName || !category) {
+      alert("Please enter a habit name and select a category.");
+      return;
+    }
 
-      setHabits((prevHabits) => [...prevHabits, newHabit]);
+    // Ensure the user is authenticated
+    const user = auth.currentUser;
+    if (!user) {
+      alert("You must be logged in to create a habit.");
+      return;
+    }
+
+    const habitId = Date.now().toString(); // Unique habit ID
+    const newHabit = {
+      id: habitId,
+      name: habitName,
+      category,
+      startDate: startDate.format("YYYY-MM-DD"),
+      icon: habitIcon,
+      color: habitColor,
+    };
+
+    try {
+      // Store habit in Firestore under the user's ID
+      await setDoc(doc(db, `users/${user.uid}/habits`, habitId), newHabit);
+
+      // Update local state
+      setHabits((prev) => [...prev, newHabit]);
       setSuccessOpen(true);
 
       // Reset form
@@ -50,6 +69,9 @@ const CreateHabit = ({ setHabits }) => {
       setStartDate(dayjs());
       setHabitIcon("🔥");
       setHabitColor("#ff9a9e");
+    } catch (error) {
+      console.error("Error creating habit:", error);
+      alert("Error: " + error.message);
     }
   };
 
@@ -62,7 +84,14 @@ const CreateHabit = ({ setHabits }) => {
               Create a New Habit
             </Typography>
 
-            <TextField fullWidth label="Habit Name" variant="outlined" sx={{ mt: 3 }} value={habitName} onChange={(e) => setHabitName(e.target.value)} />
+            <TextField
+              fullWidth
+              label="Habit Name"
+              variant="outlined"
+              sx={{ mt: 3 }}
+              value={habitName}
+              onChange={(e) => setHabitName(e.target.value)}
+            />
 
             <FormControl fullWidth sx={{ mt: 3 }}>
               <InputLabel>Category</InputLabel>
@@ -98,7 +127,12 @@ const CreateHabit = ({ setHabits }) => {
               </Button>
             </motion.div>
 
-            <Snackbar open={successOpen} autoHideDuration={3000} onClose={() => setSuccessOpen(false)} message="🎉 Habit Created Successfully!" />
+            <Snackbar
+              open={successOpen}
+              autoHideDuration={3000}
+              onClose={() => setSuccessOpen(false)}
+              message="🎉 Habit Created Successfully!"
+            />
           </CardContent>
         </Card>
       </motion.div>

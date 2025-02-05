@@ -1,16 +1,22 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyCVko019zvPTSymOJPTB34Q5Yg-sHxG2T8",
+  authDomain: "habitsync-c53fb.firebaseapp.com",
+  projectId: "habitsync-c53fb",
+  storageBucket: "habitsync-c53fb.appspot.com",
+  messagingSenderId: "1068406146411",
+  appId: "1:1068406146411:web:288c57667ed2024648b82e",
+  measurementId: "G-2ETPRP7C7S"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
 
-export { auth };
+export { db, auth, googleProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, doc, setDoc };
