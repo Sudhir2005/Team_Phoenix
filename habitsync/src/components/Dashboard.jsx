@@ -5,7 +5,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Button,
   Avatar,
   Box,
   Drawer,
@@ -15,6 +14,10 @@ import {
   ListItemText,
   IconButton,
   LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  ListItemAvatar,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import {
@@ -26,6 +29,8 @@ import {
   FaMusic,
   FaBluetoothB,
   FaInfoCircle,
+  FaMedal,
+  FaUserFriends,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import FooterNavbar from "../components/FooterNavbar";
@@ -37,9 +42,12 @@ const Dashboard = () => {
   const [rewardProgress, setRewardProgress] = useState(40);
   const [streak, setStreak] = useState(5);
   const [quote, setQuote] = useState("Your potential is endless. Keep going!");
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
+  
   const navigate = useNavigate();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const toggleLeaderboard = () => setLeaderboardOpen(!leaderboardOpen);
 
   const sidebarItems = [
     { icon: <FaFire size={20} />, text: "Streak Count", route: "/dashboard" },
@@ -62,6 +70,13 @@ const Dashboard = () => {
     }, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  const leaderboardData = [
+    { name: "Alice", streak: 10 },
+    { name: "Bob", streak: 8 },
+    { name: "Charlie", streak: 6 },
+    { name: "You", streak: streak },
+  ].sort((a, b) => b.streak - a.streak);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", background: "linear-gradient(135deg, #2C3E50, #4CA1AF)", minHeight: "100vh", color: "#fff" }}>
@@ -102,8 +117,9 @@ const Dashboard = () => {
         </Box>
 
         <Grid container spacing={3} justifyContent="center">
-          <Grid item xs={12} md={4}>
-            <motion.div whileHover={{ scale: 1.1 }}>
+          {/* Habit Progress */}
+          <Grid item xs={12} md={6}>
+            <motion.div whileHover={{ scale: 1.05 }}>
               <Card sx={{ textAlign: "center", p: 3, background: "#2E4053", color: "#fff", borderRadius: 4 }}>
                 <Typography variant="h6">Habit Progress</Typography>
                 <LinearProgress variant="determinate" value={habitProgress} sx={{ margin: "10px 0" }} />
@@ -112,16 +128,29 @@ const Dashboard = () => {
             </motion.div>
           </Grid>
 
-          <Grid item xs={12} md={4}>
-            <motion.div whileHover={{ scale: 1.1 }}>
-              <Card sx={{ textAlign: "center", p: 3, background: "#34495E", color: "#fff", borderRadius: 4 }}>
-                <Typography variant="h6"><FaFire /> Streak: {streak} Days</Typography>
+          {/* Reward Progress */}
+          <Grid item xs={12} md={6}>
+            <motion.div whileHover={{ scale: 1.05 }}>
+              <Card sx={{ textAlign: "center", p: 3, background: "#34495E", color: "#FFD700", borderRadius: 4 }}>
+                <Typography variant="h6">Reward Progress</Typography>
+                <LinearProgress variant="determinate" value={rewardProgress} sx={{ margin: "10px 0" }} />
+                <Typography mt={2}>{rewardProgress}%</Typography>
               </Card>
             </motion.div>
           </Grid>
 
-          <Grid item xs={12} md={4}>
-            <motion.div whileHover={{ scale: 1.1 }}>
+          {/* Leaderboard */}
+          <Grid item xs={12} md={6}>
+            <motion.div whileHover={{ scale: 1.05 }}>
+              <Card onClick={toggleLeaderboard} sx={{ cursor: "pointer", textAlign: "center", p: 3, background: "#1ABC9C", color: "#fff", borderRadius: 4 }}>
+                <Typography variant="h6"><FaUserFriends /> Leaderboard</Typography>
+              </Card>
+            </motion.div>
+          </Grid>
+
+          {/* Motivational Quote */}
+          <Grid item xs={12} md={6}>
+            <motion.div whileHover={{ scale: 1.05 }}>
               <Card sx={{ textAlign: "center", p: 3, background: "#2E4053", color: "#FFD700", borderRadius: 4 }}>
                 <Typography variant="h6"><FaQuoteLeft /> {quote}</Typography>
               </Card>
@@ -131,6 +160,23 @@ const Dashboard = () => {
       </Container>
 
       <FooterNavbar navValue={navValue} setNavValue={setNavValue} />
+
+      {/* Leaderboard Dialog */}
+      <Dialog open={leaderboardOpen} onClose={toggleLeaderboard}>
+        <DialogTitle sx={{ textAlign: "center", background: "#1ABC9C", color: "#fff" }}>Leaderboard</DialogTitle>
+        <DialogContent sx={{ background: "#2C3E50", color: "#fff" }}>
+          <List>
+            {leaderboardData.map((user, index) => (
+              <ListItem key={index}>
+                <ListItemAvatar>
+                  <Avatar sx={{ bgcolor: index === 0 ? "#FFD700" : "#3498DB" }}>{index + 1}</Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={user.name} secondary={`🔥 ${user.streak} Days`} />
+              </ListItem>
+            ))}
+          </List>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };
