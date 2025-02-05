@@ -13,6 +13,7 @@ import {
   setDoc 
 } from "../firebase"; // Firebase imports
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./AuthForm.css"; // Add a separate CSS file for styles
 
 const AuthForm = ({ isSignup, setIsAuthenticated }) => {
   const [email, setEmail] = useState("");
@@ -38,11 +39,9 @@ const AuthForm = ({ isSignup, setIsAuthenticated }) => {
       let userCredential;
   
       if (isSignup) {
-        // 🔹 Sign up the user
         userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
   
-        // 🔹 Store user details in Firestore
         await setDoc(doc(db, "users", user.uid), {
           uid: user.uid,
           email: user.email,
@@ -51,12 +50,10 @@ const AuthForm = ({ isSignup, setIsAuthenticated }) => {
   
         console.log("✅ User registered:", user);
       } else {
-        // 🔹 Log in the user
         userCredential = await signInWithEmailAndPassword(auth, email, password);
         console.log("✅ User logged in:", userCredential.user);
       }
   
-      // 🔹 Get authentication token
       const idToken = await userCredential.user.getIdToken();
       localStorage.setItem("token", idToken);
       setIsAuthenticated(true);
@@ -86,7 +83,6 @@ const AuthForm = ({ isSignup, setIsAuthenticated }) => {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      // 🔹 Check if user exists in Firestore, if not, add them
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email,
@@ -97,7 +93,6 @@ const AuthForm = ({ isSignup, setIsAuthenticated }) => {
 
       console.log("✅ Google Sign-In Success:", user);
 
-      // 🔹 Get authentication token
       const idToken = await user.getIdToken();
       localStorage.setItem("token", idToken);
 
@@ -110,10 +105,9 @@ const AuthForm = ({ isSignup, setIsAuthenticated }) => {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 bg-gradient">
+    <div className="auth-container">
       <motion.div
-        className="card auth-card shadow-lg p-4"
-        style={{ width: "400px", borderRadius: "20px" }}
+        className="auth-card"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -128,7 +122,6 @@ const AuthForm = ({ isSignup, setIsAuthenticated }) => {
         {error && <div className="alert alert-danger py-2">{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          {/* Email Field */}
           <div className="mb-3 input-group">
             <span className="input-group-text bg-light">
               <FaEnvelope color="#2E8B57" />
@@ -143,7 +136,6 @@ const AuthForm = ({ isSignup, setIsAuthenticated }) => {
             />
           </div>
 
-          {/* Password Field */}
           <div className="mb-3 input-group">
             <span className="input-group-text bg-light">
               <FaLock color="#2E8B57" />
@@ -158,7 +150,6 @@ const AuthForm = ({ isSignup, setIsAuthenticated }) => {
             />
           </div>
 
-          {/* Confirm Password (Signup Only) */}
           {isSignup && (
             <div className="mb-3 input-group">
               <span className="input-group-text bg-light">
@@ -175,7 +166,6 @@ const AuthForm = ({ isSignup, setIsAuthenticated }) => {
             </div>
           )}
 
-          {/* Submit Button */}
           <motion.button
             type="submit"
             className={`btn w-100 ${isSignup ? "btn-success" : "btn-primary"}`}
@@ -186,7 +176,6 @@ const AuthForm = ({ isSignup, setIsAuthenticated }) => {
             {loading ? (isSignup ? "Signing up..." : "Logging in...") : isSignup ? "Sign Up" : "Login"}
           </motion.button>
 
-          {/* Google Sign-In */}
           <motion.button
             type="button"
             className="btn btn-outline-dark w-100 mt-3 d-flex align-items-center justify-content-center"
@@ -198,7 +187,6 @@ const AuthForm = ({ isSignup, setIsAuthenticated }) => {
           </motion.button>
         </form>
 
-        {/* Toggle Between Login & Signup */}
         <p className="text-center mt-3">
           {isSignup ? "Already have an account?" : "Don't have an account?"}
           <Link to={isSignup ? "/login" : "/signup"} className="fw-bold text-decoration-none ms-1">
