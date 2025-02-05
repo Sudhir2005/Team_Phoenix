@@ -4,19 +4,19 @@ import {
   Box,
   Avatar,
   Typography,
-  LinearProgress,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogActions,
   IconButton,
   Menu,
   MenuItem,
   Switch,
   TextField,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  Divider
 } from "@mui/material";
 import { motion } from "framer-motion";
-import { FaSignOutAlt, FaTrophy, FaChartLine, FaMoon, FaSun, FaAward, FaUserEdit, FaCogs, FaUpload } from "react-icons/fa";
+import { FaSignOutAlt, FaTrophy, FaChartLine, FaMoon, FaSun, FaUpload, FaCogs, FaAward } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
@@ -93,6 +93,9 @@ const Profile = () => {
         borderRadius: 4,
         boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.1)",
         padding: 3,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
       }}
     >
       {/* 🌗 Dark Mode Toggle */}
@@ -103,21 +106,35 @@ const Profile = () => {
       </Box>
 
       {/* Profile Section */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}>
-        <Avatar
-          src={avatar}
-          sx={{
-            width: 120,
-            height: 120,
-            mx: "auto",
-            mb: 2,
-            boxShadow: "0px 0px 15px rgba(255, 99, 132, 0.6)",
-            border: "3px solid white",
-            cursor: "pointer",
-          }}
-          onClick={() => setOpenImageUpload(true)}
-        />
-        <Typography variant="h4" fontWeight="bold">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        sx={{ flexGrow: 1 }}
+      >
+        {/* Avatar with Hover Zoom Effect */}
+        <motion.div whileHover={{ scale: 1.1 }}>
+          <Avatar
+            src={avatar}
+            sx={{
+              width: 120,
+              height: 120,
+              mx: "auto",
+              mb: 2,
+              boxShadow: "0px 0px 20px rgba(255, 99, 132, 0.6)",
+              border: "3px solid white",
+              cursor: "pointer",
+              transition: "transform 0.3s ease",
+              "&:hover": {
+                transform: "scale(1.1)",
+                boxShadow: "0px 0px 30px rgba(255, 99, 132, 0.8)",
+              },
+            }}
+            onClick={() => setOpenImageUpload(true)}
+          />
+        </motion.div>
+
+        <Typography variant="h4" fontWeight="bold" sx={{ mb: 2 }}>
           {username}
           <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
             <FaCogs />
@@ -125,7 +142,11 @@ const Profile = () => {
         </Typography>
 
         {/* Settings Menu */}
-        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={() => setAnchorEl(null)}
+        >
           <MenuItem onClick={() => setOpenImageUpload(true)}>
             <FaUpload style={{ marginRight: 8 }} /> Upload Profile Picture
           </MenuItem>
@@ -136,6 +157,7 @@ const Profile = () => {
               label="Change Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              fullWidth
             />
           </MenuItem>
           <MenuItem>
@@ -143,21 +165,29 @@ const Profile = () => {
           </MenuItem>
         </Menu>
 
-        {/* XP Progress Bar with Glow */}
-        <Box sx={{ width: "100%", mt: 2 }}>
-          <LinearProgress
-            variant="determinate"
-            value={(user.xp / user.maxXp) * 100}
-            sx={{
-              height: 12,
-              borderRadius: 10,
-              backgroundColor: darkMode ? "#555" : "#ddd",
-              "& .MuiLinearProgress-bar": {
-                backgroundColor: "#ff6b81",
-                boxShadow: "0px 0px 10px rgba(255, 99, 132, 0.9)",
-              },
-            }}
-          />
+        {/* XP Display */}
+        <Box sx={{ position: "relative", width: "100%", mt: 2 }}>
+          <motion.div whileHover={{ scale: 1.05 }}>
+            <Box
+              sx={{
+                width: "100%",
+                height: 120,
+                borderRadius: "50%",
+                border: "10px solid #ff6b81",
+                boxShadow: "0px 0px 20px rgba(255, 99, 132, 0.5)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: darkMode
+                  ? "rgba(255, 255, 255, 0.1)"
+                  : "rgba(0, 0, 0, 0.2)",
+              }}
+            >
+              <Typography variant="h6" fontWeight="bold">
+                {user.xp} / {user.maxXp}
+              </Typography>
+            </Box>
+          </motion.div>
         </Box>
 
         {/* Points & Achievements */}
@@ -173,7 +203,7 @@ const Profile = () => {
           <Bar data={weeklyData} />
         </Box>
 
-        {/* Achievements Section */}
+        {/* Achievements Section with Animation */}
         <Box sx={{ mt: 4 }}>
           <Typography variant="h6" fontWeight="bold">
             🏅 Achievements
@@ -191,6 +221,7 @@ const Profile = () => {
                     display: "flex",
                     alignItems: "center",
                     gap: 1,
+                    mb: 2,
                   }}
                 >
                   <FaAward color="orange" size={20} />
@@ -203,6 +234,42 @@ const Profile = () => {
           </Box>
         </Box>
       </motion.div>
+
+      {/* Logout Button in Footer */}
+      <Box
+        sx={{
+          position: "sticky",
+          bottom: 0,
+          width: "100%",
+          padding: 2,
+          backgroundColor: darkMode ? "#2c3e50" : "#f5f5f5",
+          borderTop: "2px solid #ddd",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <Button
+          variant="contained"
+          color="secondary"
+          startIcon={<FaSignOutAlt />}
+          onClick={() => setOpenLogout(true)}
+        >
+          Logout
+        </Button>
+      </Box>
+
+      {/* Logout Confirmation */}
+      <Dialog open={openLogout} onClose={() => setOpenLogout(false)}>
+        <DialogTitle>Are you sure you want to logout?</DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setOpenLogout(false)} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleLogout} color="primary">
+            Logout
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
