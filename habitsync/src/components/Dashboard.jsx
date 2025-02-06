@@ -1,39 +1,16 @@
 import React, { useState, useEffect } from "react";
 import {
-  Container,
-  Grid,
-  Typography,
-  Card,
-  CardContent,
-  Avatar,
-  Box,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  IconButton,
-  LinearProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  ListItemAvatar,
+  Container, Grid, Typography, Card, Avatar, Box, IconButton, LinearProgress, Button, Dialog, DialogTitle, DialogContent, List, ListItem, ListItemText, ListItemAvatar, Switch, Tooltip
 } from "@mui/material";
 import { motion } from "framer-motion";
 import {
-  FaTrophy,
-  FaFire,
-  FaBars,
-  FaTimes,
-  FaQuoteLeft,
-  FaMusic,
-  FaBluetoothB,
-  FaInfoCircle,
-  FaMedal,
-  FaUserFriends,
+  FaTrophy, FaFire, FaBars, FaQuoteLeft, FaUserFriends, FaCalendarCheck, FaChartBar, FaTasks, FaPlay, FaMoon, FaSun, FaSnowflake, FaMedal
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 import FooterNavbar from "../components/FooterNavbar";
+import StreakGraph from "../components/StreakGraph";
+import CalendarTracker from "../components/CalendarTracker";
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -43,19 +20,17 @@ const Dashboard = () => {
   const [streak, setStreak] = useState(5);
   const [quote, setQuote] = useState("Your potential is endless. Keep going!");
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
-  
+  const [completedHabits, setCompletedHabits] = useState(0);
+  const [goal, setGoal] = useState(3);
+  const [darkMode, setDarkMode] = useState(false);
+  const [streakFreeze, setStreakFreeze] = useState(1);
+  const [achievements, setAchievements] = useState([]);
+
   const navigate = useNavigate();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const toggleLeaderboard = () => setLeaderboardOpen(!leaderboardOpen);
-
-  const sidebarItems = [
-    { icon: <FaFire size={20} />, text: "Streak Count", route: "/dashboard" },
-    { icon: <FaTrophy size={20} />, text: "Rewards", route: "/dashboard" },
-    { icon: <FaBluetoothB size={20} />, text: "Bluetooth", route: "/dashboard" },
-    { icon: <FaMusic size={20} />, text: "Playlists", route: "/spotifyplaylist" },
-    { icon: <FaInfoCircle size={20} />, text: "About Us", route: "/dashboard" },
-  ];
+  const toggleDarkMode = () => setDarkMode(!darkMode);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -71,41 +46,30 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const leaderboardData = [
-    { name: "Alice", streak: 10 },
-    { name: "Bob", streak: 8 },
-    { name: "Charlie", streak: 6 },
-    { name: "You", streak: streak },
-  ].sort((a, b) => b.streak - a.streak);
+  const completeHabit = () => {
+    setCompletedHabits(completedHabits + 1);
+
+    if (completedHabits + 1 === goal) {
+      setStreak(streak + 1);
+      setCompletedHabits(0); // Reset for the next day
+
+      if (streak === 7) setAchievements([...achievements, "🔥 One Week Streak"]);
+      if (streak === 30) setAchievements([...achievements, "🏆 One Month Streak"]);
+    }
+  };
+
+  const freezeStreak = () => {
+    if (streakFreeze > 0) {
+      setStreakFreeze(streakFreeze - 1);
+      alert("🔥 Streak frozen for today!");
+    } else {
+      alert("❄️ No more Streak Freezes left!");
+    }
+  };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", background: "linear-gradient(135deg, #2C3E50, #4CA1AF)", minHeight: "100vh", color: "#fff" }}>
-      <Drawer anchor="left" open={sidebarOpen} onClose={toggleSidebar}>
-        <Box sx={{ width: 250, p: 3, background: "#222", color: "#fff", height: "100vh" }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Typography variant="h6">Dashboard Menu</Typography>
-            <IconButton onClick={toggleSidebar} sx={{ color: "#fff" }}>
-              <FaTimes />
-            </IconButton>
-          </Box>
-          <List>
-            {sidebarItems.map((item, index) => (
-              <ListItem 
-                button 
-                key={index} 
-                sx={{ color: "#ddd", "&:hover": { background: "#333" } }}
-                onClick={() => {
-                  navigate(item.route);
-                  toggleSidebar();
-                }}
-              >
-                <ListItemIcon sx={{ color: "#FFD700" }}>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
+    <Box sx={{ display: "flex", flexDirection: "column", background: darkMode ? "#1A1A1A" : "linear-gradient(135deg, #2C3E50, #4CA1AF)", minHeight: "100vh", color: "#fff" }}>
+      <Sidebar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       <Container maxWidth="lg" sx={{ flexGrow: 1, py: 5 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
@@ -113,46 +77,49 @@ const Dashboard = () => {
             <FaBars size={28} />
           </IconButton>
           <Typography variant="h4" fontWeight="bold">HabitSync</Typography>
-          <Avatar sx={{ bgcolor: "#FFD700" }} />
+          <Box display="flex" alignItems="center">
+            <Switch checked={darkMode} onChange={toggleDarkMode} />
+            {darkMode ? <FaMoon size={24} /> : <FaSun size={24} />}
+          </Box>
         </Box>
 
         <Grid container spacing={3} justifyContent="center">
-          {/* Habit Progress */}
-          <Grid item xs={12} md={6}>
+          {/* Streak */}
+          <Grid item xs={12} md={4}>
             <motion.div whileHover={{ scale: 1.05 }}>
-              <Card sx={{ textAlign: "center", p: 3, background: "#2E4053", color: "#fff", borderRadius: 4 }}>
-                <Typography variant="h6">Habit Progress</Typography>
-                <LinearProgress variant="determinate" value={habitProgress} sx={{ margin: "10px 0" }} />
-                <Typography mt={2}>{habitProgress}%</Typography>
+              <Card sx={{ textAlign: "center", p: 3, background: "#E67E22", color: "#fff", borderRadius: 4 }}>
+                <Typography variant="h6"><FaFire /> Streak: {streak} Days</Typography>
+                <Tooltip title="Use Streak Freeze" arrow>
+                  <Button startIcon={<FaSnowflake />} onClick={freezeStreak} variant="contained" color="primary" sx={{ mt: 1 }}>
+                    Freeze Streak ({streakFreeze} left)
+                  </Button>
+                </Tooltip>
               </Card>
             </motion.div>
           </Grid>
 
-          {/* Reward Progress */}
+          {/* Habit Analytics */}
           <Grid item xs={12} md={6}>
-            <motion.div whileHover={{ scale: 1.05 }}>
-              <Card sx={{ textAlign: "center", p: 3, background: "#34495E", color: "#FFD700", borderRadius: 4 }}>
-                <Typography variant="h6">Reward Progress</Typography>
-                <LinearProgress variant="determinate" value={rewardProgress} sx={{ margin: "10px 0" }} />
-                <Typography mt={2}>{rewardProgress}%</Typography>
-              </Card>
-            </motion.div>
+            <StreakGraph streak={streak} />
           </Grid>
 
-          {/* Leaderboard */}
+          {/* Calendar View */}
           <Grid item xs={12} md={6}>
-            <motion.div whileHover={{ scale: 1.05 }}>
-              <Card onClick={toggleLeaderboard} sx={{ cursor: "pointer", textAlign: "center", p: 3, background: "#1ABC9C", color: "#fff", borderRadius: 4 }}>
-                <Typography variant="h6"><FaUserFriends /> Leaderboard</Typography>
-              </Card>
-            </motion.div>
+            <CalendarTracker />
           </Grid>
 
-          {/* Motivational Quote */}
-          <Grid item xs={12} md={6}>
+          {/* Achievements */}
+          <Grid item xs={12} md={4}>
             <motion.div whileHover={{ scale: 1.05 }}>
-              <Card sx={{ textAlign: "center", p: 3, background: "#2E4053", color: "#FFD700", borderRadius: 4 }}>
-                <Typography variant="h6"><FaQuoteLeft /> {quote}</Typography>
+              <Card sx={{ textAlign: "center", p: 3, background: "#9B59B6", color: "#fff", borderRadius: 4 }}>
+                <Typography variant="h6"><FaMedal /> Achievements</Typography>
+                <List>
+                  {achievements.length > 0 ? (
+                    achievements.map((achieve, index) => <ListItem key={index}><ListItemText primary={achieve} /></ListItem>)
+                  ) : (
+                    <Typography>No Achievements Yet!</Typography>
+                  )}
+                </List>
               </Card>
             </motion.div>
           </Grid>
@@ -160,23 +127,6 @@ const Dashboard = () => {
       </Container>
 
       <FooterNavbar navValue={navValue} setNavValue={setNavValue} />
-
-      {/* Leaderboard Dialog */}
-      <Dialog open={leaderboardOpen} onClose={toggleLeaderboard}>
-        <DialogTitle sx={{ textAlign: "center", background: "#1ABC9C", color: "#fff" }}>Leaderboard</DialogTitle>
-        <DialogContent sx={{ background: "#2C3E50", color: "#fff" }}>
-          <List>
-            {leaderboardData.map((user, index) => (
-              <ListItem key={index}>
-                <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: index === 0 ? "#FFD700" : "#3498DB" }}>{index + 1}</Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={user.name} secondary={`🔥 ${user.streak} Days`} />
-              </ListItem>
-            ))}
-          </List>
-        </DialogContent>
-      </Dialog>
     </Box>
   );
 };
