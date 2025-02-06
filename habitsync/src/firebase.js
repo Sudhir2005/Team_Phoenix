@@ -1,8 +1,19 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  getDoc // ✅ Fix: Ensure getDoc is imported
+} from "firebase/firestore";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  GoogleAuthProvider, 
+  signInWithPopup 
+} from "firebase/auth";
 
-// Firebase configuration
+// 🔥 Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCVko019zvPTSymOJPTB34Q5Yg-sHxG2T8",
   authDomain: "habitsync-c53fb.firebaseapp.com",
@@ -13,10 +24,21 @@ const firebaseConfig = {
   measurementId: "G-2ETPRP7C7S"
 };
 
-// Initialize Firebase
+// ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-export { db, auth, googleProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, doc, setDoc };
+// ✅ Export Firebase services
+export { 
+  db, 
+  auth, 
+  googleProvider, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signInWithPopup, 
+  doc, 
+  setDoc, 
+  getDoc // ✅ Fix: Ensure getDoc is exported
+};

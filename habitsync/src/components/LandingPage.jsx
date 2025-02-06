@@ -50,13 +50,13 @@ const LandingPage = () => {
         <Typography
           variant="h2"
           sx={{
-            fontFamily: "Rajdhani, sans-serif",
+            fontFamily: "Montserrat Inter",
             textTransform: "uppercase",
             letterSpacing: 3,
             mb: 2,
             fontWeight: "bold",
-            color: "#00FF7F", // 🟢 Neon Green
-            textShadow: "4px 4px 15px rgba(0, 255, 127, 0.9)", // Glowing Effect
+            color: "#0A192F", // 🟢 Neon Green
+            textShadow: "4px 4px 15px rgb(100, 255, 218)", // Glowing Effect
           }}
         >
           HabitSync
