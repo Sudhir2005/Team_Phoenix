@@ -118,7 +118,7 @@ const CreateHabit = ({ setHabits }) => {
                 fullWidth
                 label="Habit Name"
                 variant="outlined"
-                sx={{ mt: 3, background: "#fff", borderRadius: 2 }}
+                sx={{ mt: 3, borderRadius: 2 }}
                 value={habitName}
                 onChange={(e) => setHabitName(e.target.value)}
               />

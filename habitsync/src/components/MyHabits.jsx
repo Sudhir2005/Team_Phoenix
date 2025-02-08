@@ -135,7 +135,15 @@ const MyHabits = () => {
 
       {/* Habit List */}
       {habits.length > 0 ? (
-        <List sx={{ width: "100%", maxWidth: 500, margin: "auto", bgcolor: "background.paper", borderRadius: "10px" }}>
+        <List
+          sx={{
+            width: "100%",
+            maxWidth: 500,
+            margin: "auto",
+            bgcolor: "background.paper",
+            borderRadius: "10px",
+          }}
+        >
           {habits.map((habit) => (
             <Card key={habit.id} sx={{ mb: 2, boxShadow: 3, borderRadius: 3 }}>
               <CardContent>
@@ -145,36 +153,66 @@ const MyHabits = () => {
 
                 {/* Progress Bar */}
                 <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-                  <LinearProgress variant="determinate" value={habit.progress} sx={{ flex: 1, mr: 1 }} />
-                  <Typography variant="body2">{Math.round(habit.progress)}%</Typography>
+                  <LinearProgress
+                    variant="determinate"
+                    value={habit.progress}
+                    sx={{ flex: 1, mr: 1 }}
+                  />
+                  <Typography variant="body2">
+                    {Math.round(habit.progress)}%
+                  </Typography>
                 </Box>
 
                 {/* Task List with Checkboxes */}
                 <List>
                   {(habit.tasks || []).map((task, index) => (
-                    <ListItem key={index} sx={{ display: "flex", alignItems: "center" }}>
+                    <ListItem
+                      key={index}
+                      sx={{ display: "flex", alignItems: "center" }}
+                    >
                       <Checkbox
                         checked={task.completed}
                         onChange={() => handleTaskCompletion(habit.id, index)}
                         color="primary"
                       />
-                      <ListItemText primary={task.description} sx={{ textDecoration: task.completed ? "line-through" : "none" }} />
+                      <ListItemText
+                        primary={task.description}
+                        sx={{
+                          textDecoration: task.completed
+                            ? "line-through"
+                            : "none",
+                        }}
+                      />
                     </ListItem>
                   ))}
                 </List>
 
                 {/* Buttons */}
-                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-                <Button
-  variant="contained"
-  color="success"
-  startIcon={<TrendingUp />}
-  onClick={() => navigate(`/habit/${habit.id}`, { state: { habitName: habit.name } })} // ✅ Ensures correct name is passed
->
-  Track
-</Button>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mt: 2,
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    color="success"
+                    startIcon={<TrendingUp />}
+                    onClick={() =>
+                      navigate(`/habit/questionnaire`, {
+                        state: { habitName: habit.name },
+                      })
+                    }
+                  >
+                    Track
+                  </Button>
 
-                  <IconButton edge="end" color="error" onClick={() => handleDeleteHabit(habit.id)}>
+                  <IconButton
+                    edge="end"
+                    color="error"
+                    onClick={() => handleDeleteHabit(habit.id)}
+                  >
                     <Delete />
                   </IconButton>
                 </Box>
