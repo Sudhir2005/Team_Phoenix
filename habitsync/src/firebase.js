@@ -3,14 +3,16 @@ import {
   getFirestore, 
   doc, 
   setDoc, 
-  getDoc // ✅ Fix: Ensure getDoc is imported
+  getDoc 
 } from "firebase/firestore";
 import { 
   getAuth, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   GoogleAuthProvider, 
-  signInWithPopup 
+  signInWithPopup, 
+  updateProfile,
+  signOut
 } from "firebase/auth";
 
 // 🔥 Firebase configuration
@@ -30,6 +32,42 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
+// ✅ Function to save user details in Firestore
+const saveUserData = async (user) => {
+  if (!user) return;
+  
+  const userRef = doc(db, "users", user.uid);
+  const userSnapshot = await getDoc(userRef);
+
+  if (!userSnapshot.exists()) {
+    await setDoc(userRef, {
+      name: user.displayName || "User",
+      email: user.email,
+      profilePic: user.photoURL || "https://i.imgur.com/I80W1Q0.png",
+      createdAt: new Date(),
+    });
+  }
+};
+
+// ✅ Sign up function
+const signUpWithEmail = async (email, password, name) => {
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  await updateProfile(userCredential.user, { displayName: name });
+
+  await saveUserData(userCredential.user);
+};
+
+// ✅ Google sign-in function
+const signInWithGoogle = async () => {
+  const result = await signInWithPopup(auth, googleProvider);
+  await saveUserData(result.user);
+};
+
+// ✅ Logout function
+const logout = async () => {
+  await signOut(auth);
+};
+
 // ✅ Export Firebase services
 export { 
   db, 
@@ -38,7 +76,10 @@ export {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signInWithPopup, 
+  signUpWithEmail,
+  signInWithGoogle,
+  logout,
   doc, 
   setDoc, 
-  getDoc // ✅ Fix: Ensure getDoc is exported
+  getDoc 
 };

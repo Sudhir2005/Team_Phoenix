@@ -7,28 +7,25 @@ export const generateTaskPlan = async (habitName) => {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const prompt = `
-      Create a structured 23-day challenge to help someone develop the habit of '${habitName}'.
-      Each day should have a **unique, small task** that progressively builds the habit.
-      Format: "Day X: [Task Description]"
-      Example for 'Jogging': 
-      - Day 1: Walk for 10 minutes.
-      - Day 2: Jog for 5 minutes, then walk for 10 minutes.
-      - ...
-      Generate exactly 23 days of tasks.
+      Generate a structured **23-day challenge** to master '${habitName}'.
+      Each day should have a **unique, actionable task** that builds progressively.
+      Use **exactly this format**:
+      Day 1: [Task]
+      Day 2: [Task]
+      ...
+      Day 23: [Task]
     `;
 
     const result = await model.generateContent(prompt);
-    const responseText = result?.response?.text();
+    const textResponse = await result.response.text(); // Ensure correct data extraction
 
-    if (!responseText) throw new Error("No response from AI");
+    if (!textResponse) throw new Error("AI response is empty");
 
-    // Extract tasks properly
-    const tasks = responseText
+    return textResponse
       .split("\n")
       .filter((line) => line.startsWith("Day"))
-      .slice(0, 23); // Ensure exactly 23 tasks
-
-    return tasks.length ? tasks : ["⚠️ AI couldn't generate tasks. Try again!"];
+      .slice(0, 23)
+      .map((task) => task.trim());
   } catch (error) {
     console.error("❌ AI Error:", error);
     return ["⚠️ AI failed to generate tasks. Please try again!"];

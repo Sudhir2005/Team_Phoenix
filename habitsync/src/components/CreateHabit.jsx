@@ -15,11 +15,12 @@ import {
   CardContent,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import { FaCheckCircle, FaSmile, FaPalette } from "react-icons/fa";
+import { FaCheckCircle, FaSmile, FaPalette, FaBars } from "react-icons/fa";
 import Picker from "emoji-picker-react";
 import dayjs from "dayjs";
-import { auth, db } from "../firebase"; // Import Firebase
+import { auth, db } from "../firebase"; // Firebase imports
 import { doc, setDoc } from "firebase/firestore";
+import Sidebar from "./Sidebar"; // ✅ Import Sidebar
 
 const CreateHabit = ({ setHabits }) => {
   const [habitName, setHabitName] = useState("");
@@ -29,6 +30,9 @@ const CreateHabit = ({ setHabits }) => {
   const [habitColor, setHabitColor] = useState("#ff9a9e");
   const [successOpen, setSuccessOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // ✅ Sidebar state
+
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen); // ✅ Sidebar toggle
 
   const categories = ["Fitness", "Health", "Productivity", "Mindfulness", "Finance", "Hobbies"];
 
@@ -38,14 +42,13 @@ const CreateHabit = ({ setHabits }) => {
       return;
     }
 
-    // Ensure the user is authenticated
     const user = auth.currentUser;
     if (!user) {
       alert("You must be logged in to create a habit.");
       return;
     }
 
-    const habitId = Date.now().toString(); // Unique habit ID
+    const habitId = Date.now().toString();
     const newHabit = {
       id: habitId,
       name: habitName,
@@ -56,14 +59,9 @@ const CreateHabit = ({ setHabits }) => {
     };
 
     try {
-      // Store habit in Firestore under the user's ID
       await setDoc(doc(db, `users/${user.uid}/habits`, habitId), newHabit);
-
-      // Update local state
       setHabits((prev) => [...prev, newHabit]);
       setSuccessOpen(true);
-
-      // Reset form
       setHabitName("");
       setCategory("");
       setStartDate(dayjs());
@@ -76,41 +74,58 @@ const CreateHabit = ({ setHabits }) => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ textAlign: "center", mt: 5 }}>
-      {/* Card Animation with Framer Motion */}
-      <motion.div 
-        initial={{ opacity: 0, y: 50 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 0.8 }}
-      >
-        <Card sx={{ p: 3, borderRadius: 4, boxShadow: 3, background: "#f3f4f6" }}>
-          <CardContent>
-            <Typography variant="h4" fontWeight="bold" color="#2E8B57">
+    <Box
+      sx={{
+        background: "linear-gradient(135deg, #667eea, #764ba2)",
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+      }}
+    >
+      {/* ✅ Sidebar Component */}
+      <Sidebar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+
+      <Container maxWidth="sm">
+        {/* Card with Glassmorphic Effect */}
+        <Card
+          sx={{
+            p: 4,
+            borderRadius: 5,
+            boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.3)",
+            background: "rgba(255, 255, 255, 0.15)",
+            backdropFilter: "blur(15px)",
+            textAlign: "center",
+            color: "#fff",
+          }}
+        >
+          {/* ✅ Sidebar Toggle Button */}
+          <Box display="flex" justifyContent="space-between">
+            <IconButton onClick={toggleSidebar} sx={{ color: "#FFD700" }}>
+              <FaBars size={24} />
+            </IconButton>
+          </Box>
+
+          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+            <Typography variant="h4" fontWeight="bold" color="#FFD700">
               Create a New Habit
             </Typography>
 
-            {/* Habit Name Field with smooth entry animation */}
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
+            {/* 📝 Habit Name Input */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
               <TextField
                 fullWidth
                 label="Habit Name"
                 variant="outlined"
-                sx={{ mt: 3 }}
+                sx={{ mt: 3, background: "#fff", borderRadius: 2 }}
                 value={habitName}
                 onChange={(e) => setHabitName(e.target.value)}
               />
             </motion.div>
 
-            {/* Category Dropdown with animation */}
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              transition={{ delay: 0.3, duration: 0.5 }}
-            >
+            {/* 📌 Category Dropdown */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
               <FormControl fullWidth sx={{ mt: 3 }}>
                 <InputLabel>Category</InputLabel>
                 <Select value={category} onChange={(e) => setCategory(e.target.value)}>
@@ -123,29 +138,22 @@ const CreateHabit = ({ setHabits }) => {
               </FormControl>
             </motion.div>
 
-            {/* Emoji Picker Icon with Hover Animation */}
+            {/* 😃 Emoji Picker */}
             <Box mt={3} display="flex" justifyContent="center">
-              <motion.div 
-                whileHover={{ scale: 1.2 }} 
-                whileTap={{ scale: 0.9 }}
-              >
+              <motion.div whileHover={{ scale: 1.2 }}>
                 <IconButton color="primary" onClick={() => setEmojiPickerOpen(!emojiPickerOpen)}>
                   <FaSmile size={24} />
                 </IconButton>
               </motion.div>
 
               {emojiPickerOpen && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  transition={{ duration: 0.3 }}
-                >
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
                   <Picker onEmojiClick={(e, emojiObject) => setHabitIcon(emojiObject.emoji)} />
                 </motion.div>
               )}
             </Box>
 
-            {/* Color Picker with Hover Effect */}
+            {/* 🎨 Color Picker */}
             <Box mt={3} display="flex" alignItems="center" justifyContent="center">
               <motion.div whileHover={{ scale: 1.1 }}>
                 <FaPalette size={24} />
@@ -158,26 +166,36 @@ const CreateHabit = ({ setHabits }) => {
               />
             </Box>
 
-            {/* Create Habit Button with Hover Scaling Animation */}
+            {/* 🚀 Create Habit Button */}
             <motion.div whileHover={{ scale: 1.1 }} style={{ marginTop: "30px" }}>
-              <Button variant="contained" color="primary" startIcon={<FaCheckCircle />} onClick={handleCreateHabit}>
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "#FFD700",
+                  color: "#222",
+                  fontWeight: "bold",
+                  ":hover": { backgroundColor: "#FFC107" },
+                }}
+                startIcon={<FaCheckCircle />}
+                onClick={handleCreateHabit}
+              >
                 Create Habit
               </Button>
             </motion.div>
 
-            {/* Success Snackbar with Slide-Up Animation */}
+            {/* 🎉 Success Snackbar */}
             <Snackbar
               open={successOpen}
               autoHideDuration={3000}
               onClose={() => setSuccessOpen(false)}
               message="🎉 Habit Created Successfully!"
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
               TransitionProps={{ in: successOpen, timeout: 300 }}
             />
-          </CardContent>
+          </motion.div>
         </Card>
-      </motion.div>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

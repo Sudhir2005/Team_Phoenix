@@ -1,0 +1,24 @@
+.color-empty {
+    fill: #e0e0e0; /* Light gray for no contributions */
+  }
+  
+  .color-scale-1 {
+    fill: #a3a1ff; /* Light Blue */
+  }
+  
+  .color-scale-2 {
+    fill: #7a75ff; /* Soft Purple */
+  }
+  
+  .color-scale-3 {
+    fill: #6251ff; /* Deep Purple */
+  }
+  
+  .color-scale-4 {
+    fill: #4a3aff; /* Darker Purple */
+  }
+  
+  .color-scale-5 {
+    fill: #321aff; /* Rich Dark Blue */
+  }
+  
